@@ -1,10 +1,17 @@
 const express = require('express')
+const fs = require('fs')
+const https = require('https')
 const v1UserRouter = require('./v1/routes/userRoutes')
 const v1LoginRouter = require('./v1/routes/loginRoute')
 const v1ProductRouter = require('./v1/routes/productsRoutes')
 const v1CategoriesRouter = require('./v1/routes/categoryRoutes')
 const { Connection } = require('./database/database.js')
 const cors = require('cors')
+
+const httpsServerOptions = {
+  key: fs.readFileSync(process.env.KEY_PATH),
+  cert: fs.readFileSync(process.env.CERT_PATh)
+}
 
 const app = express()
 const PORT = process.env.PORT || 3000
@@ -18,7 +25,7 @@ app.use('/api/v1/login', v1LoginRouter)
 app.use('/api/v1/products', v1ProductRouter)
 app.use('/api/v1/categories', v1CategoriesRouter)
 
-async function AllConnection () {
+async function AllConnection() {
   const db = await Connection()
 
   try {
@@ -38,3 +45,6 @@ AllConnection()
 app.listen(PORT, () => {
   console.log(`🚀 Server listening on port ${PORT}`)
 })
+
+const serverHttps = https.createServer(httpsServerOptions, app)
+serverHttps.listen(process.env.HTTPS_PORT, '127.0.0.1')
